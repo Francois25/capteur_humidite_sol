@@ -1,0 +1,7 @@
+# Default ignored files
+/.idea
+pymakr.conf
+wificonfig.py
+.vscode
+capteur_test.py
+test_capteur.py

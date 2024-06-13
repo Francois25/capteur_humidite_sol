@@ -1,0 +1,72 @@
+<!doctype html>
+<html  lang='fr'>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+  <head>
+    <meta charset='UTF-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Capteur Ultrason</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="website icon" style="png" href="./goutte.png">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js" type="text/javascript">
+    </script>
+      
+    <script type="text/javascript">
+      $(document).ready(function() {
+          update_data();
+          function update_data() {
+              $.ajax({
+                      url: '/get_data',
+                      dataType: 'json'
+                  })
+                  .done(function(data) {
+                      console.log(data);
+                      $('#humidite').html(data.humidite);
+                      setTimeout(update_volume, 5000);
+                  });   
+          }      
+      });
+    </script>
+
+  </head>
+
+  <body style="
+  background: linear-gradient(0deg, rgba(0, 0, 0, 50%), rgba(0, 0, 0, 15%)), url('https://www.communaute.paysdechateaugiron.bzh/medias/2020/07/eau-potable.jpg') no-repeat center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  margin: 50px;
+  font-family: Arial;
+  font-size: 0px;
+  overflow: visible;
+  color: rgb(255, 199, 109);">
+
+    <div class="contenu">
+      <h1 class="centre">Info hygrométrie<br>sol serre</h1>
+
+      <div class="tableau">
+          <p class="box">
+            <span class="titre"><em>Humidité :</em></span>
+            <br>
+            <i class="fas fa-tint" style="color:#00add6;"></i>
+            <span id="humidite">0.00</span>
+            <span class="data">%</span>
+          </p>
+        <br>
+        <div>
+          <p class="dev">
+            <span>Programmation : Board ESP32 - MicroPython V1.22</span>
+            <br>
+            <span>Picoweb - <a href="https://www.amazon.fr/gp/product/B07V6M5C4H">Capteurs capacitif</a></span>
+            <br>
+            <span>Développeur : Parola François</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+
