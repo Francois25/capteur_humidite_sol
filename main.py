@@ -11,14 +11,11 @@ import umail
 import utime as time
 import uasyncio as asyncio
 
-
-
 # --------------------- WIFI ------------------------
 #
 # enter your wifi ssid and your password in wificonfig file
 
 ipaddress = wificonnect.connectSTA(ssid=wificonfig.ssid, password=wificonfig.password)
-
 
 # ------------------- SET UP -------------------------
 PIN_ANALOG = Pin(32)  # choisir un pin analogique sur l'ESP
@@ -61,8 +58,9 @@ def send_mail(to_address, subject, body):
     smtp.write("\r\n")  # Fin des en-têtes, début du corps du message
     smtp.write(body)
 
-    smtp.send() 
+    smtp.send()
     smtp.quit()
+
 
 # ---------------------------------------------------------
 # --------------------- START PROGRAMME -------------------
