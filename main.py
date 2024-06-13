@@ -5,7 +5,6 @@ import wificonnect
 import picoweb
 import prog_led
 import network
-import espnow
 import ulogging
 import umail
 import utime as time
