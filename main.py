@@ -1,5 +1,7 @@
 # CAPTEUR HUMIDITE SOL CONNECTE
 from machine import ADC, Pin, UART, RTC
+
+import mailing_config
 import wificonfig
 import wificonnect
 import picoweb
@@ -81,11 +83,10 @@ async def infinite_loop(start_chrono=0):
     while True:
         chrono = time.ticks_ms()
         diff_chrono = time.ticks_diff(chrono, start_chrono) / 1000
-        print(('-'*11), '\n', f"différence chrono = {diff_chrono}")
+        print(('-' * 11), '\n', f"différence chrono = {diff_chrono}")
         level_humidity = get_taux()
-        if (diff_chrono > 24*3600) and (level_humidity <= 10.0):
-            start_chrono = send_mail(wificonfig.mail_send_to, wificonfig.mail_object,
-                                     wificonfig.mail_body)  # envoie d'un message demande d'arrosage
+        if (diff_chrono > 24 * 3600) and (level_humidity <= 10.0):
+            start_chrono = send_mail(mailing_config.mail_send_to, mailing_config.mail_object, mailing_config.mail_body)  # envoie d'un message demande d'arrosage
         else:
             NOT_ENOUGH_WATER_LED.value(0)
 
@@ -94,7 +95,7 @@ async def infinite_loop(start_chrono=0):
         else:
             NOT_ENOUGH_WATER_LED.value(0)
         # Attendre avant de recommencer la boucle - une heure => 3600 secondes
-        await asyncio.sleep(4*3600)  # Attente non bloquante relance toutes les 4h
+        await asyncio.sleep(4 * 3600)  # Attente non bloquante relance toutes les 4h
 
 
 # ---------------------------------------------------------
