@@ -1,6 +1,5 @@
 .contenu {
   min-width: 335px;
-  box-shadow: 0px 0px 20px 8px #23272cc0;
   margin-top: 100px;
   margin-bottom: 100px;
 }
@@ -10,7 +9,7 @@ div.tableau {
   position: relative;
   text-align: center;
   width: 96%;
-  color: rgb(255, 199, 109);
+  color: white;
   margin: 0px 20px 30px 20px;
   display: inline-block;
   font-weight: bold;
@@ -24,13 +23,14 @@ h1 {
   margin-top: 0px;
 }
 .centre {
-  color: rgb(83, 185, 161);
+  color: rgb(202, 255, 0);
   text-align: center;
   width: 100%;
 }
 
 .data {
-text-align: right;
+  text-align: right;
+  color: white
 }
 
 .cube {
@@ -39,6 +39,7 @@ text-align: right;
 
 .titre {
   text-align: center;
+  color: white
 }
 
 p.box {
@@ -47,8 +48,8 @@ p.box {
 }
 
 p.dev {
-  color: rgb(0, 0, 0);
-  font-size: 13px;
+  color: white;
+  font-size: 14px;
   margin-bottom: 0px;
 }
 
@@ -59,4 +60,9 @@ button {
   box-shadow: 0px 0px 40px 2px #76e4ffc0;
   border-width: 0px;
   font-weight: bold;
+}
+
+a.dev:hover {
+  color: white;
+  border: 3px solid white;
 }
