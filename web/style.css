@@ -2,34 +2,30 @@
     box-sizing: border-box;
 }
 
-.contenu {
-  min-width: 335px;
-  margin-top: 100px;
-  margin-bottom: 100px;
-}
-
 body {
   background: linear-gradient(0deg, rgba(0, 0, 0, 40%), rgba(0, 0, 0, 15%)), url(hygro.webp) no-repeat center/cover;
   background-size: cover;
   font-family: Arial;
   overflow: visible;
   text-align: center;
-  color: rgb(255, 199, 109);
   }
 
-div.tableau {
+.contenu {
+  min-width: 335px;
+  margin-top: 100px;
+  margin-bottom: 100px;
   font-size: 60px;
   position: relative;
-  color: white;
   display: inline-block;
   font-weight: bold;
-  overflow: visible;
   height: max-content;
+  color: white;
 }
 
 h1 {
   font-size: 80px;
   margin-top: 0px;
+  color: rgb(255, 199, 109);
 }
 
 p.dev {
