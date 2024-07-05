@@ -1,20 +1,29 @@
+* {
+    box-sizing: border-box;
+}
+
 .contenu {
   min-width: 335px;
   margin-top: 100px;
   margin-bottom: 100px;
 }
 
-div.tableau {
-  font-size: 38px;
-  position: relative;
+body {
+  background: linear-gradient(0deg, rgba(0, 0, 0, 40%), rgba(0, 0, 0, 15%)), url(hygro.webp) no-repeat center/cover;
+  background-size: cover;
+  font-family: Arial;
+  overflow: visible;
   text-align: center;
-  width: 96%;
+  color: rgb(255, 199, 109);
+  }
+
+div.tableau {
+  font-size: 60px;
+  position: relative;
   color: white;
-  margin: 0px 20px 30px 20px;
   display: inline-block;
   font-weight: bold;
   overflow: visible;
-  padding: 0px 2px 0px 2px;
   height: max-content;
 }
 
@@ -22,47 +31,25 @@ h1 {
   font-size: 80px;
   margin-top: 0px;
 }
-.centre {
-  color: rgb(202, 255, 0);
-  text-align: center;
-  width: 100%;
-}
-
-.data {
-  text-align: right;
-  color: white
-}
-
-.cube {
-  text-align: left;
-}
-
-.titre {
-  text-align: center;
-  color: white
-}
-
-p.box {
-  margin-top: 0px;
-  margin-bottom: 0px;
-}
 
 p.dev {
   color: white;
-  font-size: 14px;
-  margin-bottom: 0px;
-}
-
-button {
-  background-color: rgb(212, 191, 156);
-  color: rgb(83, 185, 161);
   font-size: 20px;
-  box-shadow: 0px 0px 40px 2px #76e4ffc0;
-  border-width: 0px;
-  font-weight: bold;
 }
 
-a.dev:hover {
-  color: white;
-  border: 3px solid white;
+/* RESPONSIVE DESIGN FOR PHONE */
+@media only screen and (max-width: 480px)
+{
+    h1 {
+      font-size: 50px;
+      margin-top: 0px;
+    }
+
+    p.dev {
+      font-size: 14px;
+    }
+
+    div.tableau {
+      font-size: 40px;
+}
 }
