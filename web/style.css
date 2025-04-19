@@ -10,6 +10,7 @@ body {
   text-align: center;
   }
 
+
 .contenu {
   min-width: 335px;
   margin-top: 100px;
@@ -24,7 +25,8 @@ body {
 
 h1 {
   font-size: 80px;
-  margin-top: 0px;
+  margin-top: -10px;
+  margin-bottom: 30px;
   color: rgb(255, 199, 109);
 }
 
@@ -32,6 +34,7 @@ p.dev {
   color: white;
   font-size: 20px;
 }
+
 
 /* RESPONSIVE DESIGN FOR PHONE */
 @media only screen and (max-width: 480px)
@@ -47,5 +50,5 @@ p.dev {
 
     div.tableau {
       font-size: 40px;
-}
+    }
 }

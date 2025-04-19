@@ -24,7 +24,7 @@
                   .done(function(data) {
                       console.log(data);
                       $('#humidite').html(data.humidite);
-                      setTimeout(update_volume, 5000);
+                      setTimeout(update_data, 5000);
                   });   
           }      
       });
@@ -43,7 +43,12 @@
         <span id="humidite">0.00</span>
         <span class="data">%</span>
         <br>
+        <button onclick="forceWatering()" style="margin-bottom: 20px; padding: 10px 15px; font-size: 20px; background-color: #00add6; color: white; border: none; border-radius: 12px; cursor: pointer;">
+          <i class="fas fa-water"></i> Forcer l'arrosage
+        </button>
         <br>
+        <p id="watering-status" style="color: green; font-weight: bold; display: none;">Arrosage en cours…</p>
+        <p id="wifi-status" style="font-weight: bold; font-size: 15px; background-color: #00f15d; color: black; border: none; border-radius: 12px;">Wi-Fi : Inconnu</p>
         <p class="dev">
           <span>Programmation : <a href="https://fr.aliexpress.com/item/32964479255.html" target="_blank">Board ESP32 WROOM</a><br>Firmware : MicroPython V1.22</span>
           <br>
@@ -54,5 +59,43 @@
       </div>
     </div>
   </body>
+
+  <script>
+    function forceWatering() {
+      const status = document.getElementById("watering-status");
+      fetch("/force_watering")
+        .then(res => res.json())
+        .then(data => {
+            status.innerText = "Arrosage lancé !";
+            status.style.display = "block";
+            setTimeout(() => {
+                status.style.display = "none";
+            }, 5000); // disparait après 5s
+        })
+        .catch(err => {
+            status.innerText = "Erreur lors de l’arrosage.";
+            status.style.color = "red";
+            status.style.display = "block";
+        });
+  }
+
+    function update_wifi_status() {
+      fetch("/wifi_status")
+        .then(res => res.json())
+        .then(data => {
+            const wifiStatus = document.getElementById("wifi-status");
+            if (data.connected) {
+                wifiStatus.innerText = "Wi-Fi : Connecté ✅";
+                wifiStatus.style.color = "green";
+            } else {
+                wifiStatus.innerText = "Wi-Fi : Non connecté ❌";
+                wifiStatus.style.color = "red";
+            }
+        });
+  }
+  update_wifi_status();
+  setInterval(update_wifi_status, 10000); // Vérifie toutes les 10s
+  </script>
+  
 </html>
 
