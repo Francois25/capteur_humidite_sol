@@ -1,24 +1,7 @@
 import network
 
-def connectSTA(ssid, password, name='MicroPython'):
-    global wlan
-    wlan = network.WLAN(network.STA_IF)
-    wlan.active(True)
-    if not wlan.isconnected():
-        print('Connecting to network...')
-        wlan.connect(ssid, password)
-        if not wlan.isconnected():
-            wlan.config(reconnects = 5)
-    wlan.config(dhcp_hostname = name)
-    print('network config:', wlan.ifconfig())
-    print("station.config(dhcp_hostname) =", wlan.config('dhcp_hostname'))
-    return wlan.ifconfig()[0]
-  
-def is_connected():
-    wlan = network.WLAN(network.STA_IF)
-    return wlan.isconnected()
 
-def reconnect(ssid, password):
+def connect(ssid, password, name='MicroPython'):
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
     if not wlan.isconnected():
@@ -28,6 +11,21 @@ def reconnect(ssid, password):
             if wlan.isconnected():
                 print('Reconnecté au Wi-Fi')
                 break
-            time.sleep(1)
         else:
             print('Échec de reconnexion Wi-Fi')
+    wlan.config(dhcp_hostname = name)
+    print('network config:', wlan.ifconfig())
+    print("station.config(dhcp_hostname) =", wlan.config('dhcp_hostname'))
+    return wlan.ifconfig()[0]
+
+
+def is_connected():
+    wlan = network.WLAN(network.STA_IF)
+    print(wlan.ifconfig())
+    return wlan.isconnected()
+
+
+def get_ip():
+    wlan = network.WLAN(network.STA_IF)
+    wlan.active(True)
+    return wlan.ifconfig()[0] if wlan.isconnected() else None
