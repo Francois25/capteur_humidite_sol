@@ -20,6 +20,7 @@ NOT_ENOUGH_WATER_LED = Pin(2, Pin.OUT, 0)  # ESP32 motherboard LED
 SENSOR_HUMIDITY_PIN = Pin(32, Pin.IN)  # analogic PIN on ESP
 RELAIS_PIN = Pin(15, Pin.OUT, 0) # analogic PIN on ESP
 MANUAL_WATERING_BUTTON = Pin(4, Pin.IN, Pin.PULL_UP)  # Bouton branché entre GPIO12 et GND
+MANUAL_WATERING_BUTTON_OFF = Pin(17, Pin.IN, Pin.PULL_UP)  # Bouton branché entre GPIO12 et GND
 DHC22_PIN = Pin(16, Pin.IN) # analogic PIN on ESP
 
 # Generic Variables
@@ -30,8 +31,9 @@ WATERING_TIME = 60 * 5  # watering time : 60 * number of minutes
 # Initial variables
 ipaddress = " "
 last_mail = 0
+watering_interrupted = False
+is_watering = False
 
-# watchdog_timer = WDT(timeout=30000)  # Timeout en millisecondes (ici 30s)
 
 # --------------------- WIFI ------------------------
 #connection Wifi si perte et clignotement de la led de board tant qu'il n'y a pas de wifi
@@ -57,7 +59,7 @@ async def wifi_monitor(ssid, password):
             return ipaddress
             
         else:
-            await asyncio.sleep(10)  # Vérifie la connexion toutes les 10 secondes      
+            await asyncio.sleep(60)  # Vérifie la connexion toutes les 60 secondes      
     
     
 async def wait_wifi_connection():
@@ -171,7 +173,7 @@ async def send_mail(to_address, subject, body):
     return last_mail
 
 
-async def watering(watering_time = WATERING_TIME):
+async def watering():
     """Watering
 
     Switch on watering device since Web app or manualy
@@ -179,59 +181,97 @@ async def watering(watering_time = WATERING_TIME):
     Args:
         watering_time (int, optional): Time of watering before switch off. Defaults to WATERING_TIME.
     """
+    global watering_interrupted
+    global is_watering
+    watering_interrupted = False
+    is_watering = True
     print("Arrosage en cours")
     chrono_watering = time.ticks_ms()
-    diff_chrono_watering = 0       
-    while diff_chrono_watering < watering_time:
-        #print("Allumée depuis", diff_chrono_watering, "s")
+    while True:
+        if watering_interrupted:
+            print("Arrosage interrompu manuellement")
+            break
+
         RELAIS_PIN.value(1)
-        diff_chrono_watering = (time.ticks_diff(time.ticks_ms(), chrono_watering)) / 1000
+        elapsed_time = (time.ticks_diff(time.ticks_ms(), chrono_watering)) / 1000
+        if elapsed_time >= WATERING_TIME:
+            break
+
+        await asyncio.sleep(0.1)
         
     RELAIS_PIN.value(0)
     NOT_ENOUGH_WATER_LED.value(0)
+    is_watering = False
     print("Arrosage terminé")
-    asyncio.sleep(0.1)
-        
-        
+
+
+async def no_watering():
+    global watering_interrupted
+    global is_watering
+    watering_interrupted = True
+    is_watering = False
+    print("Arret de l'arrosage")
+    RELAIS_PIN.value(0)
+    NOT_ENOUGH_WATER_LED.value(0)
+    print("Arrosage stoppé")
+    await asyncio.sleep(0.1)
+    
 
 # --------------------- ROUTING PROGRAMME -------------------
 async def infinite_loop():
     global level_humidity
-    #watchdog_timer.feed()
-    
-    if MANUAL_WATERING_BUTTON.value() == 0:  # Si bouton pressé lancement de l'arrosage
-        print(' ' + 30*'-', " * Bouton pressé, arrosage forcé", 30*'-')
-        await watering()
-        
+    global hum
+    global temp    
+       
     while True:
-        await temperature_humidity_measurement(DHC22_PIN)
+        if MANUAL_WATERING_BUTTON.value() == 0:  # If button pressed, watering started
+            print(' ' + 30*'-', " * Bouton pressé, arrosage forcé", 30*'-')
+            await watering()
+            
+        elif MANUAL_WATERING_BUTTON_OFF.value() == 0:
+            print(' ' + 30*'-', "\n * Bouton pressé, arrosage stoppé\n", 30*'-')
+            await no_watering()
+            
+        temp, hum = await temperature_humidity_measurement(DHC22_PIN)
         level_humidity = await get_taux()
             
         if level_humidity <= 10:
             NOT_ENOUGH_WATER_LED.value(1)
             await watering()
             try:
-                await send_mail(mailing_config.mail_send_to, mailing_config.mail_object, mailing_config.mail_body)  # envoie d'un e-mail de demande d'arrosage
+                await send_mail(mailing_config.mail_send_to, mailing_config.mail_object, mailing_config.mail_body)  # send e-mail watering needeed
             except Exception as e:
                 print("Erreur lors de l'envoi de l'e-mail :", e)
             
         else:
             NOT_ENOUGH_WATER_LED.value(0)
             
-        await asyncio.sleep(RESTART_LOOP)  # Attente non bloquante relance toutes les X secondes
+        for _ in range(RESTART_LOOP):  # RESTART_LOOP = 3600 → 3600 * 1s = 1h
+            if MANUAL_WATERING_BUTTON.value() == 0:
+                print(' ' + 30*'-', "\n * Bouton pressé, arrosage forcé\n", 30*'-')
+                await watering()
+                
+            elif MANUAL_WATERING_BUTTON_OFF.value() == 0:
+                print(' ' + 30*'-', "\n * Bouton pressé, arrosage stoppé\n", 30*'-')
+                await no_watering()
+                
+            await asyncio.sleep(1)
 
 
 # ---------------------------------------------------------
 # ---- ROUTING PICOWEB ------------------------------------
 async def start_picoweb():
     global level_humidity
+    global temp
+    global hum
+    
     app = picoweb.WebApp(__name__)
 
     @app.route("/hygro_compressed.webp")
     def send_image(req, resp):
-        yield from picoweb.start_response(resp, content_type="image/webp")
+        yield from picoweb.start_response(resp, content_type="image/jpg")
         try:
-            with open("/hygro_compressed.webp", "rb") as f:
+            with open("/serre.jpg", "rb") as f:
                 yield from resp.awrite(f.read())
                 print('chargement background')
         except Exception as e:
@@ -249,15 +289,25 @@ async def start_picoweb():
         yield from app.sendfile(resp, '/web/style.css')
 
     @app.route("/get_data")
-    def get_volume(req, resp):
-        yield from picoweb.jsonify(resp, {'humidite': level_humidity})
+    def get_data(req, resp):
+        yield from picoweb.jsonify(resp, {'hygrometrie': level_humidity, 'temperature': temp, 'humidite': hum})
                        
     @app.route("/force_watering")
-    def force_watering(req, resp):
+    async def force_watering(req, resp):
         print("Arrosage déclenché depuis l'interface web")
         await watering()
         yield from picoweb.jsonify(resp, {"status": "ok"})
-                
+    
+    @app.route("/stop_watering")
+    async def stop_watering(req, resp):
+        print("Arrosage stoppé depuis l'interface web")
+        await no_watering()
+        yield from picoweb.jsonify(resp, {"status": "ok"})   
+    
+    @app.route("/watering_status")
+    def watering_status(req, resp):
+        yield from picoweb.jsonify(resp, {'watering': is_watering})
+        
     @app.route("/wifi_status")
     def wifi_status(req, resp):
         import wificonnect

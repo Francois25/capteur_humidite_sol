@@ -3,8 +3,8 @@
 from machine import Pin
 import dht
 
-def sensor(Pin_number):
-    sensor = dht.DHT22(Pin_number)
+def sensor(pin):
+    sensor = dht.DHT22(pin)
     try:
         sensor.measure()
         temp = sensor.temperature()
@@ -14,7 +14,10 @@ def sensor(Pin_number):
             #temp = temp * (9/5) + 32.0
             return temp, hum
         else:
+            print('Invalid temperature sensor reading')
+            print('Temp value use : 15°C')
             return None
-    except Exception as e:
-        print("EXCEPT ERROR: Failed to return temperature sensor information", e)
+    except:
+        print("EXCEPT ERROR: Failed to return temperature sensor information")
+        print("EXCEPT ERROR : temp value use : 15°C")
         return None
