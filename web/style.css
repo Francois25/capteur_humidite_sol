@@ -3,8 +3,10 @@
 }
 
 body {
-background: linear-gradient(0deg, rgba(0, 0, 0, 40%), rgba(0, 0, 0, 15%)), url(serre.jpg) no-repeat center/cover;
+background: linear-gradient(0deg, rgba(0, 0, 0, 40%), rgba(0, 0, 0, 15%)), url('/serre.webp');
+background-repeat: no-repeat;
 background-size: cover;
+background-position: center;
 font-family: Arial;
 overflow: visible;
 text-align: center;
@@ -12,7 +14,7 @@ text-align: center;
 
 
 .contenu {
-background: linear-gradient(0deg, rgba(0, 0, 0, 40%), rgba(0, 0, 0, 10%)),center/cover;
+background: linear-gradient(0deg, rgba(0, 0, 0, 40%), rgba(0, 0, 0, 10%)), center/cover;
 min-width: 335px;
 margin-top: 100px;
 margin-bottom: 60px;

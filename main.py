@@ -26,7 +26,7 @@ DHC22_PIN = Pin(16, Pin.IN) # analogic PIN on ESP
 # Generic Variables
 HUMIDITE_MIN = 4095
 HUMIDITE_MAX = 1170
-WATERING_TIME = 60 * 5  # watering time : 60 * number of minutes
+WATERING_TIME = 60 * 1  # watering time : 60 * number of minutes
 
 # Initial variables
 ipaddress = " "
@@ -191,6 +191,10 @@ async def watering():
         if watering_interrupted:
             print("Arrosage interrompu manuellement")
             break
+        
+        elif MANUAL_WATERING_BUTTON_OFF.value() == 0:
+            print(' ' + 30*'-', "\n * Bouton pressé, arrosage stoppé\n", 30*'-')
+            await no_watering()
 
         RELAIS_PIN.value(1)
         elapsed_time = (time.ticks_diff(time.ticks_ms(), chrono_watering)) / 1000
@@ -237,7 +241,7 @@ async def infinite_loop():
             
         if level_humidity <= 10:
             NOT_ENOUGH_WATER_LED.value(1)
-            await watering()
+            #await watering()
             try:
                 await send_mail(mailing_config.mail_send_to, mailing_config.mail_object, mailing_config.mail_body)  # send e-mail watering needeed
             except Exception as e:
@@ -264,56 +268,96 @@ async def start_picoweb():
     global level_humidity
     global temp
     global hum
-    
+
     app = picoweb.WebApp(__name__)
 
-    @app.route("/hygro_compressed.webp")
-    def send_image(req, resp):
-        yield from picoweb.start_response(resp, content_type="image/jpg")
-        try:
-            with open("/serre.jpg", "rb") as f:
-                yield from resp.awrite(f.read())
-                print('chargement background')
-        except Exception as e:
-            print('Problème de background', e)
-            
     @app.route("/")
     def index(req, resp):
-        yield from picoweb.start_response(resp)
-        yield from app.sendfile(resp, '/web/index.html')
+        yield from picoweb.start_response(resp, content_type="text/html")
+        try:
+            with open("/web/index.html", "r") as f:
+                while True:
+                    data = f.read(512)
+                    if not data:
+                        break
+                    yield from resp.awrite(data)
+            print("Page index.html servie")
+        except Exception as e:
+            print("Erreur chargement index.html :", e)
 
     @app.route("/style.css")
     def css(req, resp):
-        print("Send style.css")
-        yield from picoweb.start_response(resp)
-        yield from app.sendfile(resp, '/web/style.css')
+        yield from picoweb.start_response(resp, content_type="text/css")
+        try:
+            with open("/web/style.css", "r") as f:
+                while True:
+                    data = f.read(512)
+                    if not data:
+                        break
+                    yield from resp.awrite(data)
+            print("Feuille CSS servie")
+        except Exception as e:
+            print("Erreur chargement style.css :", e)
+
+    @app.route("/serre.webp")
+    def background(req, resp):
+        yield from picoweb.start_response(resp, content_type="image/webp")
+        try:
+            with open("/web/serre.webp", "rb") as f:
+                while True:
+                    data = f.read(512)
+                    if not data:
+                        break
+                    yield from resp.awrite(data)
+            print("Arrière-plan webp servi")
+        except Exception as e:
+            print('Erreur chargement serre_hq_redim.webp:', e)
+
+    @app.route("/goutte_ico.png")
+    def icon(req, resp):
+        yield from picoweb.start_response(resp, content_type="image/png")
+        try:
+            with open("/web/goutte_ico.png", "rb") as f:
+                while True:
+                    data = f.read(512)
+                    if not data:
+                        break
+                    yield from resp.awrite(data)
+            print("Icône servie")
+        except Exception as e:
+            print('Erreur chargement goutte_ico.png:', e)
 
     @app.route("/get_data")
     def get_data(req, resp):
-        yield from picoweb.jsonify(resp, {'hygrometrie': level_humidity, 'temperature': temp, 'humidite': hum})
-                       
+        yield from picoweb.jsonify(resp, {
+            'hygrometrie': level_humidity,
+            'temperature': temp,
+            'humidite': hum
+        })
+
     @app.route("/force_watering")
     async def force_watering(req, resp):
         print("Arrosage déclenché depuis l'interface web")
         await watering()
         yield from picoweb.jsonify(resp, {"status": "ok"})
-    
+
     @app.route("/stop_watering")
     async def stop_watering(req, resp):
         print("Arrosage stoppé depuis l'interface web")
         await no_watering()
-        yield from picoweb.jsonify(resp, {"status": "ok"})   
-    
+        yield from picoweb.jsonify(resp, {"status": "ok"})
+
     @app.route("/watering_status")
     def watering_status(req, resp):
         yield from picoweb.jsonify(resp, {'watering': is_watering})
-        
+
     @app.route("/wifi_status")
     def wifi_status(req, resp):
         import wificonnect
         connected = wificonnect.is_connected()
         yield from picoweb.jsonify(resp, {'connected': connected})
 
+    print("Serveur PicoWeb démarré")
     app.run(debug=True, host=ipaddress, port=80)
 
 
@@ -332,7 +376,5 @@ async def main():
     except Exception as e:
         print("Erreur dans les tâches principales :", e)
 
-
-asyncio.run(main())
-
-
+async def start():
+    await main()
