@@ -5,3 +5,4 @@ wificonfig.py
 .vscode
 capteur_test.py
 test_capteur.py
+/doc

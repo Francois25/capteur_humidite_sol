@@ -1,68 +1,125 @@
-.contenu {
-  min-width: 335px;
-  margin-top: 100px;
-  margin-bottom: 100px;
+* {
+  box-sizing: border-box;
 }
 
-div.tableau {
-  font-size: 38px;
-  position: relative;
-  text-align: center;
-  width: 96%;
-  color: white;
-  margin: 0px 20px 30px 20px;
-  display: inline-block;
-  font-weight: bold;
-  overflow: visible;
-  padding: 0px 2px 0px 2px;
-  height: max-content;
+body {
+background: linear-gradient(0deg, rgba(0, 0, 0, 40%), rgba(0, 0, 0, 15%)), url('/serre.webp');
+background-repeat: no-repeat;
+background-size: cover;
+background-position: center;
+font-family: Arial;
+overflow: visible;
+text-align: center;
+}
+
+
+.contenu {
+background: linear-gradient(0deg, rgba(0, 0, 0, 40%), rgba(0, 0, 0, 10%)), center/cover;
+min-width: 335px;
+margin-top: 100px;
+margin-bottom: 60px;
+font-size: 60px;
+position: relative;
+display: inline-block;
+font-weight: bold;
+height: max-content;
+color: white;
 }
 
 h1 {
-  font-size: 80px;
-  margin-top: 0px;
-}
-.centre {
-  color: rgb(202, 255, 0);
-  text-align: center;
-  width: 100%;
-}
-
-.data {
-  text-align: right;
-  color: white
-}
-
-.cube {
-  text-align: left;
-}
-
-.titre {
-  text-align: center;
-  color: white
-}
-
-p.box {
-  margin-top: 0px;
-  margin-bottom: 0px;
+font-size: 100px;
+margin-top: -10px;
+margin-bottom: 30px;
+color: rgb(255, 199, 109);
 }
 
 p.dev {
-  color: white;
-  font-size: 14px;
-  margin-bottom: 0px;
+font-weight: lighter;
+color: rgb(126, 125, 125);
+font-size: 15px;
 }
 
-button {
-  background-color: rgb(212, 191, 156);
-  color: rgb(83, 185, 161);
-  font-size: 20px;
-  box-shadow: 0px 0px 40px 2px #76e4ffc0;
-  border-width: 0px;
-  font-weight: bold;
+.donnees_secondaires {
+margin: 20px 0px 20px;
+color: rgba(224, 224, 224, 0.384);
+font-size: 35px;
+border-top: 30px;
 }
 
-a.dev:hover {
-  color: white;
-  border: 3px solid white;
+.status {
+font-weight: normal;
+color: rgba(154, 159, 184, 1);
+font-size: 65%;
+border-radius: 10px;
+display: inline-block;
+}
+
+
+/* Toggle slide arrosage*/
+.switch {
+position: relative;
+display: inline-block;
+width: 80px;
+height: 38px;
+margin-top: 10px;
+}
+
+.switch input {
+opacity: 0;
+width: 0;
+height: 0;
+}
+
+.slider {
+position: absolute;
+cursor: pointer;
+background-color: #ccc;
+transition: 0.4s;
+border-radius: 34px;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+}
+
+.slider:before {
+position: absolute;
+content: "";
+height: 30px;
+width: 30px;
+border-radius: 50%;
+left: 4px;
+bottom: 4px;
+background-color: white;
+transition: 0.4s;
+}
+
+input:checked + .slider {
+background-color: #4CAF50; /* vert */
+}
+
+input:not(:checked) + .slider {
+background-color: #f44336; /* rouge */
+}
+
+input:checked + .slider:before {
+transform: translateX(40px);
+}
+
+
+/* RESPONSIVE DESIGN FOR PHONE */
+@media only screen and (max-width: 480px)
+{
+  h1 {
+    font-size: 50px;
+    margin-top: 0px;
+  }
+
+  p.dev {
+    font-size: 14px;
+  }
+
+  div.tableau {
+    font-size: 40px;
+  }
 }
