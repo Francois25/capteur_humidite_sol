@@ -14,7 +14,7 @@ import random # for test only
 
 # ------------------- SET UP -------------------------
 # Pin used on ESP 32
-RESTART_LOOP = 3600 # delay between 2 mesurements
+RESTART_LOOP = 24 * 3600 
 DEFAULT_CAPTOR_LED = Pin(14, Pin.OUT, 0)
 NOT_ENOUGH_WATER_LED = Pin(2, Pin.OUT, 0)  # ESP32 motherboard LED
 SENSOR_HUMIDITY_PIN = Pin(32, Pin.IN)  # analogic PIN on ESP
@@ -24,8 +24,8 @@ MANUAL_WATERING_BUTTON_OFF = Pin(17, Pin.IN, Pin.PULL_UP)  # Bouton branché ent
 DHC22_PIN = Pin(16, Pin.IN) # analogic PIN on ESP
 
 # Generic Variables
-HUMIDITE_MIN = 4095
-HUMIDITE_MAX = 1170
+HUMIDITE_MIN = 2620
+HUMIDITE_MAX = 1230
 WATERING_TIME = 60 * 1  # watering time : 60 * number of minutes
 
 # Initial variables
@@ -155,7 +155,7 @@ async def send_mail(to_address, subject, body):
         print("Pas de connexion Wi-Fi !")
         return
     
-    if (last_mail == 0) or (diff_send_mail >= 120): #24*3600):
+    if (last_mail == 0) or (diff_send_mail >= 24*3600):
         print("Envoie d'e-mail")
         smtp = umail.SMTP('smtp.gmail.com', 587)  # Remplacer par votre serveur SMTP et port
         smtp.login(wificonfig.smtp_login, wificonfig.smtp_password)  # Info login dans fichier wificonfig.py
