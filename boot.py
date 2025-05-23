@@ -1,12 +1,13 @@
-# This file is executed on every boot (including wake-boot from deepsleep)
+import uasyncio as asyncio
+import utime as time
+import main
 import esp
 import gc
-import main
-import uasyncio as asyncio
 
 esp.osdebug(None)
 gc.enable()
 gc.collect()
 
+time.sleep(1)
 # start program
 asyncio.run(main.start())

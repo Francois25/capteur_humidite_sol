@@ -18,8 +18,8 @@
       $(document).ready(function () {
         update_data();
         syncSwitch();
-        setInterval(update_data, 3000);
-        setInterval(syncSwitch, 2000);
+        setInterval(update_data, 10000);
+        setInterval(syncSwitch, 10000);
     
         function update_data() {
           $.ajax({

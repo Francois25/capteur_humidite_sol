@@ -14,7 +14,7 @@ import random # for test only
 
 # ------------------- SET UP -------------------------
 # Pin used on ESP 32
-RESTART_LOOP = 24 * 3600 
+RESTART_LOOP = 10 #1 * 3600 
 DEFAULT_CAPTOR_LED = Pin(14, Pin.OUT, 0)
 NOT_ENOUGH_WATER_LED = Pin(2, Pin.OUT, 0)  # ESP32 motherboard LED
 SENSOR_HUMIDITY_PIN = Pin(32, Pin.IN)  # analogic PIN on ESP
@@ -24,13 +24,13 @@ MANUAL_WATERING_BUTTON_OFF = Pin(17, Pin.IN, Pin.PULL_UP)  # Bouton branché ent
 DHC22_PIN = Pin(16, Pin.IN) # analogic PIN on ESP
 
 # Generic Variables
-HUMIDITE_MIN = 2620
+HUMIDITE_MIN = 2640
 HUMIDITE_MAX = 1230
 WATERING_TIME = 60 * 1  # watering time : 60 * number of minutes
+EMAIL_INTERVAL = 43200  # 12h en secondes
 
 # Initial variables
 ipaddress = " "
-last_mail = 0
 watering_interrupted = False
 is_watering = False
 
@@ -148,29 +148,25 @@ async def send_mail(to_address, subject, body):
     Returns:
         int: value of the last moment id that a mail whas send before
     """
-    global last_mail
-    diff_send_mail = (time.ticks_diff(time.ticks_ms(), last_mail)) / 1000
     
     if not wificonnect.is_connected():
         print("Pas de connexion Wi-Fi !")
         return
     
-    if (last_mail == 0) or (diff_send_mail >= 24*3600):
-        print("Envoie d'e-mail")
-        smtp = umail.SMTP('smtp.gmail.com', 587)  # Remplacer par votre serveur SMTP et port
-        smtp.login(wificonfig.smtp_login, wificonfig.smtp_password)  # Info login dans fichier wificonfig.py
-        smtp.to(to_address)
-        smtp.write("From: mail_automatic@Esp32_micropython\r\n")
-        smtp.write("To: {}\r\n".format(to_address))
-        smtp.write("Subject: {}\r\n".format(subject))
-        smtp.write("\r\n")  # Fin des en-têtes, début du corps du message
-        smtp.write(body)
-        smtp.send()
-        smtp.quit()
-        await asyncio.sleep(0.1)                
-        print(('-' * 11), '\nE-mail info arrosage nécessaire envoyé')
-        last_mail = time.ticks_ms()
-    return last_mail
+    print("Envoie d'e-mail")
+    smtp = umail.SMTP('smtp.gmail.com', 587)  # Remplacer par votre serveur SMTP et port
+    smtp.login(wificonfig.smtp_login, wificonfig.smtp_password)  # Info login dans fichier wificonfig.py
+    smtp.to(to_address)
+    smtp.write("From: mail_automatic@Esp32_micropython\r\n")
+    smtp.write("To: {}\r\n".format(to_address))
+    smtp.write("Subject: {}\r\n".format(subject))
+    smtp.write("\r\n")  # Fin des en-têtes, début du corps du message
+    smtp.write(body)
+    smtp.send()
+    smtp.quit()
+    await asyncio.sleep(0.1)                
+    print(('-' * 11), '\nE-mail info arrosage nécessaire envoyé')
+
 
 
 async def watering():
@@ -199,6 +195,7 @@ async def watering():
         RELAIS_PIN.value(1)
         elapsed_time = (time.ticks_diff(time.ticks_ms(), chrono_watering)) / 1000
         if elapsed_time >= WATERING_TIME:
+            print("Arrosage terminé")
             break
 
         await asyncio.sleep(0.1)
@@ -206,7 +203,7 @@ async def watering():
     RELAIS_PIN.value(0)
     NOT_ENOUGH_WATER_LED.value(0)
     is_watering = False
-    print("Arrosage terminé")
+
 
 
 async def no_watering():
@@ -214,7 +211,6 @@ async def no_watering():
     global is_watering
     watering_interrupted = True
     is_watering = False
-    print("Arret de l'arrosage")
     RELAIS_PIN.value(0)
     NOT_ENOUGH_WATER_LED.value(0)
     print("Arrosage stoppé")
@@ -223,29 +219,28 @@ async def no_watering():
 
 # --------------------- ROUTING PROGRAMME -------------------
 async def infinite_loop():
-    global level_humidity
     global hum
-    global temp    
+    global temp
+    last_email_time = 0  # initialisé à 0 au démarrage    
        
     while True:
-        if MANUAL_WATERING_BUTTON.value() == 0:  # If button pressed, watering started
-            print(' ' + 30*'-', " * Bouton pressé, arrosage forcé", 30*'-')
-            await watering()
-            
-        elif MANUAL_WATERING_BUTTON_OFF.value() == 0:
-            print(' ' + 30*'-', "\n * Bouton pressé, arrosage stoppé\n", 30*'-')
-            await no_watering()
-            
         temp, hum = await temperature_humidity_measurement(DHC22_PIN)
+        global level_humidity
         level_humidity = await get_taux()
             
         if level_humidity <= 10:
             NOT_ENOUGH_WATER_LED.value(1)
-            #await watering()
-            try:
-                await send_mail(mailing_config.mail_send_to, mailing_config.mail_object, mailing_config.mail_body)  # send e-mail watering needeed
-            except Exception as e:
-                print("Erreur lors de l'envoi de l'e-mail :", e)
+            current_time = time.time()
+                        
+            if current_time - last_email_time >= EMAIL_INTERVAL:
+                print(">> Niveau d'eau faible. Envoi de l'e-mail...")
+                try:
+                    await send_mail(mailing_config.mail_send_to, mailing_config.mail_object, mailing_config.mail_body)  # send e-mail watering needeed
+                    last_email_time = current_time
+                except Exception as e:
+                    print("Erreur lors de l'envoi de l'e-mail :", e)
+                
+            await watering()
             
         else:
             NOT_ENOUGH_WATER_LED.value(0)
@@ -260,7 +255,7 @@ async def infinite_loop():
                 await no_watering()
                 
             await asyncio.sleep(1)
-
+        
 
 # ---------------------------------------------------------
 # ---- ROUTING PICOWEB ------------------------------------
