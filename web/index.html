@@ -9,8 +9,8 @@
     <title>Effpe Design - Hygro sol</title>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" type="png" href="/goutte_ico.png"/>
-    <link rel="apple-touch-icon" type="png" href="/goutte_ico.png"/>
-    
+    <link rel="apple-touch-icon" href="/goutte_ico.png">
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js" type="text/javascript">
     </script>
       
@@ -18,8 +18,8 @@
       $(document).ready(function () {
         update_data();
         syncSwitch();
-        setInterval(update_data, 10000);
-        setInterval(syncSwitch, 10000);
+        setInterval(update_data, 5000);
+        setInterval(syncSwitch, 3000);
     
         function update_data() {
           $.ajax({

@@ -371,5 +371,9 @@ async def main():
     except Exception as e:
         print("Erreur dans les tâches principales :", e)
 
+
 async def start():
     await main()
+
+    
+asyncio.run(start())
